@@ -1,8 +1,10 @@
 import express, { Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
+import { validateRequest } from '../middlewares/request-validation';
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import { Password } from '../services/password';
+import { BadRequestError } from '../errors/bad-request-error';
 
 const route = express.Router();
 
@@ -12,18 +14,13 @@ route.post(
     body('email').isEmail().withMessage('Email is invalid'),
     body('password').trim().notEmpty().withMessage('Password must be supplied'),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
-    // Destructuring the incoming data
     const { email, password } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const existingUser = await User.findOne({ where: { email: email } });
+    const existingUser = await User.scope('withpassword').findOne({ where: { email: email } });
     if (!existingUser) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      throw new BadRequestError('Invalid Credentials');
     }
 
     const passwordsMatch = await Password.Compare(

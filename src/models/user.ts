@@ -1,4 +1,4 @@
-import { Model, Table,  Column, DataType, DefaultScope } from 'sequelize-typescript';
+import { Model, Table,  Column, DataType, DefaultScope, Scopes } from 'sequelize-typescript';
 
 interface UserAttrs {
   id?: number;
@@ -14,6 +14,11 @@ interface UserAttrs {
 
 @DefaultScope({
   attributes: { exclude: ['password'] }
+})
+@Scopes({
+   withpassword: {
+    attributes: { include: ['password']}
+   }
 })
 @Table({
   tableName: "user",

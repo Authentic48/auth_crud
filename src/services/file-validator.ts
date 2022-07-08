@@ -1,11 +1,8 @@
 import { FileTypeValidator } from '../validators/file-type-validator';
 import { FileSizeValidator } from '../validators/file-size-validator';
-
 interface ValidatorResponse {
-  isValid: boolean;
-  errorMessage: string;
+  isValid: Boolean;
 }
-
 const fileTypes = ['.jpg', '.png'];
 
 export const validateFileSize = async (
@@ -14,10 +11,7 @@ export const validateFileSize = async (
   const fileSizeValidator = new FileSizeValidator(fileSize);
   const isValid = fileSizeValidator.validateFileSize();
 
-  return {
-    isValid,
-    errorMessage: isValid ? '' : fileSizeValidator.getErrorMessage(),
-  };
+  return { isValid };
 };
 
 export const validateFileType = async (
@@ -26,8 +20,5 @@ export const validateFileType = async (
   const fileTypeValidator = new FileTypeValidator(fileType, fileTypes);
   const isValid = fileTypeValidator.validateFileType();
 
-  return {
-    isValid,
-    errorMessage: isValid ? '' : fileTypeValidator.getErrorMessage(),
-  };
+  return { isValid };
 };

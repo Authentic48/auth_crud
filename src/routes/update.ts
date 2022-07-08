@@ -1,11 +1,15 @@
 import express, { Request, Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
+import path from 'path';
+
 import User from '../models/user';
 import { ImageUploader } from '../services/upload';
 import { validateFileSize } from '../services/file-validator';
 import { validateFileType } from '../services/file-validator';
-import path from 'path';
+import { validateRequest } from '../middlewares/request-validation';
+import { NotFoundError } from '../errors/not-found-error';
+import { BadRequestError } from '../errors/bad-request-error';
 
 const route = express.Router();
 
@@ -23,23 +27,19 @@ route.put(
       .isIn(['Male', 'Female'])
       .withMessage('Gender doesn\t contain valid value'),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
     const { email, firstName, lastName, photo, gender } = req.body;
     const { id } = req.params;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const user = await User.findOne({ where: { id } });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundError();
     }
 
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).send('No files were uploaded.');
+       throw new BadRequestError('No file was uploaded');
     }
 
     const { name, size } = req.files.photo as UploadedFile;
@@ -47,7 +47,7 @@ route.put(
     const validateSize = await validateFileSize(size);
 
     if (!validateType.isValid || !validateSize.isValid) {
-      throw new Error('Invalid file type / size');
+      throw new BadRequestError('Invalid file type / size');
     }
 
     const imgPath = await ImageUploader.upload(req.files.photo as UploadedFile);

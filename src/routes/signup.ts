@@ -1,8 +1,10 @@
 import express, { Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
+import { validateRequest } from '../middlewares/request-validation';
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import { Password } from '../services/password';
+import { BadRequestError } from '../errors/bad-request-error';
 
 const route = express.Router();
 
@@ -16,18 +18,14 @@ route.post(
       .isLength({ min: 5, max: 15 })
       .withMessage('Password must be between 4 and 20 characters'),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
     // Destructuring the incoming data
     const { firstName, email, password } = req.body;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const existingUser = await User.findOne({ where: { email: email } });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+       throw new BadRequestError('User already exist');
     }
 
     const hashedPassword = await Password.Hash(password);
