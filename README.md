@@ -43,8 +43,12 @@ This application can run locally using:
 ``` 
 {
  'id': 'id',
- 'name': 'name',
+ 'firstName': 'name',
+ 'lastName': 'last name'
  'email': 'email',
+ 'gender': 'male/female',
+ 'dateOfRegistration': 'date',
+ 'photoUrl': 'imagePath'
  token: jwt-token
 }
 ```
@@ -60,9 +64,13 @@ This application can run locally using:
 'row': 
 [
 {
- 'id': 'id',
- 'name': 'name',
+  'id': 'id',
+ 'firstName': 'name',
+ 'lastName': 'last name'
  'email': 'email',
+ 'gender': 'male/female',
+ 'dateOfRegistration': 'date',
+ 'photoUrl': 'imagePath'
  token: jwt-token
 }
 ]
